@@ -2,13 +2,27 @@
 
 echo && echo "$0: " && echo
 
-meta() { curl -s "http://169.254.169.254/latest/meta-data/$1"; }
+meta() {
+    if [ "$CLOUD_PROVIDER" == "aws" ]; then
+        curl -s "http://169.254.169.254/latest/meta-data/$1"
+    elif [ "$CLOUD_PROVIDER" == "gcp" ]; then
+        curl -s -H "Metadata-Flavor: Google" "http://169.254.169.254/computeMetadata/v1/$1"
+    else
+        echo "Unsupported cloud provider: $CLOUD_PROVIDER"
+        exit 1
+    fi
+}
 
 HOSTNAME=$(hostname -s)
-INTERNAL_IP=${1:-$(meta local-ipv4)}
-
+if [ "$CLOUD_PROVIDER" == "aws" ]; then
+    INTERNAL_IP=${2:-$(meta local-ipv4)}
 # In the future, this should be the load balancer ip
-CONTROLLER_IP=$(meta public-ipv4)
+    CONTROLLER_IP=$(meta public-ipv4)
+elif [ "$CLOUD_PROVIDER" == "gcp" ]; then
+    INTERNAL_IP=${2:-$(meta instance/network-interfaces/0/ip)}
+    CONTROLLER_IP=$(meta instance/network-interfaces/0/access-configs/0/external-ip)
+fi
+
 
 # Configure API Server
 sudo mkdir -p /var/lib/kubernetes/pki

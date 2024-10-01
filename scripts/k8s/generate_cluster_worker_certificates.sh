@@ -3,10 +3,24 @@
 # Default output directory
 OUTPUT_DIR=${1:-./certificates}
 
-meta() { curl -s "http://169.254.169.254/latest/meta-data/$1"; }
+CLOUD_PROVIDER="gcp"
+meta() {
+    if [ "$CLOUD_PROVIDER" == "aws" ]; then
+        curl -s "http://169.254.169.254/latest/meta-data/$1"
+    elif [ "$CLOUD_PROVIDER" == "gcp" ]; then
+        curl -s -H "Metadata-Flavor: Google" "http://169.254.169.254/computeMetadata/v1/$1"
+    else
+        echo "Unsupported cloud provider: $CLOUD_PROVIDER"
+        exit 1
+    fi
+}
 
 HOSTNAME=$(hostname -s)
-INTERNAL_IP=${2:-$(meta local-ipv4)}
+if [ "$CLOUD_PROVIDER" == "aws" ]; then
+    INTERNAL_IP=${2:-$(meta local-ipv4)}
+elif [ "$CLOUD_PROVIDER" == "gcp" ]; then
+    INTERNAL_IP=${2:-$(meta instance/network-interfaces/0/ip)}
+fi
 
 # Please consider using TLS bootstrapping in the future, for automated certificate signings on nodes
 # Paths to the CA key and certificate

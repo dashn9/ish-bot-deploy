@@ -21,3 +21,4 @@ terraform.rc
 # Local environment variable files
 .env
 .aws_credentials
+.gcp_credentials
