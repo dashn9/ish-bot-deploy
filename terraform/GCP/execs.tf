@@ -2,7 +2,7 @@ resource "null_resource" "generate_cluster_encryption_config_yaml" {
 
     depends_on = [ null_resource.generate_k8s_ca ]
     provisioner "local-exec" {
-        command = "chmod +x ../scripts/k8s/generate_configs.sh; ../scripts/k8s/generate_configs.sh"
+        command = "chmod +x ../../scripts/k8s/generate_configs.sh; ../../scripts/k8s/generate_configs.sh"
     }
 
     # This will ensure the CA is regenerated only if there are changes
@@ -12,7 +12,7 @@ resource "null_resource" "generate_cluster_encryption_config_yaml" {
 }
 resource "null_resource" "generate_k8s_ca" {
     provisioner "local-exec" {
-        command = "chmod +x ../scripts/k8s/generate_certificate_authority.sh; ../scripts/k8s/generate_certificate_authority.sh k8s-ca 'kubernetes-ca'"
+        command = "chmod +x ../../scripts/k8s/generate_certificate_authority.sh; ../../scripts/k8s/generate_certificate_authority.sh k8s-ca 'kubernetes-ca'"
     }
 
     # This will ensure the CA is regenerated only if there are changes
@@ -25,7 +25,7 @@ resource "null_resource" "generate_cluster_control_plane_certificates" {
 
     depends_on = [ null_resource.generate_k8s_ca ]
     provisioner "local-exec" {
-        command = "chmod +x ../scripts/k8s/generate_cluster_control_plane_certificates.sh; ../scripts/k8s/generate_cluster_control_plane_certificates.sh"
+        command = "chmod +x ../../scripts/k8s/generate_cluster_control_plane_certificates.sh; ../../scripts/k8s/generate_cluster_control_plane_certificates.sh"
     }
 
     # This will ensure the CA is regenerated only if there are changes
@@ -37,21 +37,21 @@ resource "null_resource" "generate_cluster_control_plane_certificates" {
 # Regenerate Control Plane certs again (This is because the kube-apiserver and etcd certs needs to have the IP altNames added)
 resource "null_resource" "regenerate_cluster_control_plane_certificates" {
     provisioner "local-exec" {
-        command = "../scripts/k8s/generate_cluster_control_plane_certificates.sh -ip 127.0.0.1,${join(",", aws_instance.ish_bot_kube_master.*.private_ip)} -p ${aws_eip.ish_bot_kube_master_eip[0].public_ip}"
+        command = "../../scripts/k8s/generate_cluster_control_plane_certificates.sh -ip 127.0.0.1,${join(",", google_compute_instance.ish_bot_kube_master.*.private_ip)} -p ${google_compute_address.ish_bot_kube_master_ip.address}"
     }
 
-    depends_on = [ aws_instance.ish_bot_kube_master ]
+    depends_on = [ google_compute_instance.ish_bot_kube_master ]
 }
 
 resource "null_resource" "redistribute_regenerated_certs_on_master" {
     depends_on = [null_resource.regenerate_cluster_control_plane_certificates]
-    count      = length(aws_instance.ish_bot_kube_master)
+    count      = length(google_compute_instance.ish_bot_kube_master)
 
     connection {
         type        = "ssh"
         user        = var.master_node_user
         private_key = file("${var.ssh_path}/${var.master_node_name}-${count.index}.key")
-        host        = aws_eip.ish_bot_kube_master_eip[count.index].public_ip
+        host        = google_compute_address.ish_bot_kube_master_ip[count.index].public_ip
     }
 
     provisioner "file" {
@@ -73,14 +73,14 @@ resource "null_resource" "redistribute_regenerated_certs_on_master" {
 
 # Reason for this, is the worker nodes has to be provisioned before creating the rbac
 resource "null_resource" "create_rbac_on_master_nodes" {
-    depends_on = [aws_instance.ish_bot_kube_worker]
-    count      = length(aws_instance.ish_bot_kube_master)
+    depends_on = [google_compute_instance.ish_bot_kube_worker]
+    count      = length(google_compute_instance.ish_bot_kube_master)
 
     connection {
         type        = "ssh"
         user        = var.master_node_user
         private_key = file("${var.ssh_path}/${var.master_node_name}-${count.index}.key")
-        host        = aws_eip.ish_bot_kube_master_eip[count.index].public_ip
+        host        = google_compute_address.ish_bot_kube_master_ip[count.index].public_ip
     }
 
     provisioner "remote-exec" {

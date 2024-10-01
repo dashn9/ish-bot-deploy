@@ -1,4 +1,9 @@
-resource "google_compute_instance" "k8s_master_node" {
+resource "google_compute_address" "ish_bot_kube_master_ip" {
+  name   = "ish-bot-kube-master-ip"
+  region = "${var.region}-a"
+}
+
+resource "google_compute_instance" "ish_bot_kube_master" {
   boot_disk {
     auto_delete = true
 
@@ -16,6 +21,9 @@ resource "google_compute_instance" "k8s_master_node" {
 
   network_interface {
     subnetwork    = "${google_compute_subnetwork.k8s_subnet.name}"
+    access_config {
+      nat_ip = google_compute_address.ish_bot_kube_master_ip.address
+    }
   }
 
   metadata = {
@@ -27,7 +35,7 @@ resource "google_compute_instance" "k8s_master_node" {
     type        = "ssh"
     user        = var.master_node_user
     private_key = file("${var.ssh_path}/${var.master_node_name}-${count.index}.key")
-    host        = self.public_ip
+    host        = self.network_interface.0.access_config.0.nat_ip
   }
 
   provisioner "file" {
@@ -193,7 +201,7 @@ resource "google_compute_instance" "ish_bot_kube_worker" {
   }
 
   network_interface {
-    subnetwork = google_compute_subnetwork.k8s_subnets[count.index].self_link
+    subnetwork = google_compute_subnetwork.k8s_subnet.self_link
     access_config {
       # This block gives the instance external access
     }
@@ -217,7 +225,7 @@ resource "google_compute_instance" "ish_bot_kube_worker" {
     type        = "ssh"
     user        = var.worker_node_user
     private_key = file("${var.ssh_path}/${var.worker_node_name}-${count.index}.key")
-    host        = self.public_ip
+    host        = self.network_interface.0.access_config.0.nat_ip
   }
   provisioner "file" {
     source      = "${var.certificates_path}/k8s-ca.crt"
@@ -276,8 +284,8 @@ resource "google_compute_instance" "ish_bot_kube_worker" {
       "./install_worker.sh",
       "./generate_cluster_worker_certificates.sh .",
       # In the future, when you create multiple master nodes for HA, you would want to use a load balance and attach a single publics ip to the entire cluster
-      "./generate_kubelet_config.sh ${aws_eip.ish_bot_kube_master_eip[0].public_ip}",
-      "./generate_proxy_config.sh ${aws_eip.ish_bot_kube_master_eip[0].public_ip}",
+      "./generate_kubelet_config.sh ${google_compute_address.ish_bot_kube_master_ip.address}",
+      "./generate_proxy_config.sh ${google_compute_address.ish_bot_kube_master_ip.address}",
       "./start_worker.sh",
     ]
   }

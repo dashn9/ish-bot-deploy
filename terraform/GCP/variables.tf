@@ -23,11 +23,11 @@ variable "certificates_path" {
 }
 
 variable "scripts_path" {
-  default = "../scripts/k8s"
+  default = "../../scripts/k8s"
 }
 
 variable "configs_path" {
-  default = "../scripts/k8s/configs/"
+  default = "../../scripts/k8s/configs/"
 }
 
 variable "master_node_type" {

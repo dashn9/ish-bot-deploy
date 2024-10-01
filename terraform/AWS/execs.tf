@@ -2,7 +2,7 @@ resource "null_resource" "generate_cluster_encryption_config_yaml" {
 
     depends_on = [ null_resource.generate_k8s_ca ]
     provisioner "local-exec" {
-        command = "chmod +x ../scripts/k8s/generate_configs.sh; ../scripts/k8s/generate_configs.sh"
+        command = "chmod +x ../../scripts/k8s/generate_configs.sh; ../../scripts/k8s/generate_configs.sh"
     }
 
     # This will ensure the CA is regenerated only if there are changes
@@ -12,7 +12,7 @@ resource "null_resource" "generate_cluster_encryption_config_yaml" {
 }
 resource "null_resource" "generate_k8s_ca" {
     provisioner "local-exec" {
-        command = "chmod +x ../scripts/k8s/generate_certificate_authority.sh; ../scripts/k8s/generate_certificate_authority.sh k8s-ca 'kubernetes-ca'"
+        command = "chmod +x ../../scripts/k8s/generate_certificate_authority.sh; ../../scripts/k8s/generate_certificate_authority.sh k8s-ca 'kubernetes-ca'"
     }
 
     # This will ensure the CA is regenerated only if there are changes
@@ -25,7 +25,7 @@ resource "null_resource" "generate_cluster_control_plane_certificates" {
 
     depends_on = [ null_resource.generate_k8s_ca ]
     provisioner "local-exec" {
-        command = "chmod +x ../scripts/k8s/generate_cluster_control_plane_certificates.sh; ../scripts/k8s/generate_cluster_control_plane_certificates.sh"
+        command = "chmod +x ../../scripts/k8s/generate_cluster_control_plane_certificates.sh; ../../scripts/k8s/generate_cluster_control_plane_certificates.sh"
     }
 
     # This will ensure the CA is regenerated only if there are changes
@@ -37,7 +37,7 @@ resource "null_resource" "generate_cluster_control_plane_certificates" {
 # Regenerate Control Plane certs again (This is because the kube-apiserver and etcd certs needs to have the IP altNames added)
 resource "null_resource" "regenerate_cluster_control_plane_certificates" {
     provisioner "local-exec" {
-        command = "../scripts/k8s/generate_cluster_control_plane_certificates.sh -ip 127.0.0.1,${join(",", aws_instance.ish_bot_kube_master.*.private_ip)} -p ${aws_eip.ish_bot_kube_master_eip[0].public_ip}"
+        command = "../../scripts/k8s/generate_cluster_control_plane_certificates.sh -ip 127.0.0.1,${join(",", aws_instance.ish_bot_kube_master.*.private_ip)} -p ${aws_eip.ish_bot_kube_master_eip[0].public_ip}"
     }
 
     depends_on = [ aws_instance.ish_bot_kube_master ]

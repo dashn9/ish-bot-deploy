@@ -7,15 +7,16 @@ resource "google_compute_subnetwork" "k8s_subnet" {
   name          = "${var.name_prefix}-kubernetes-subnet"
   ip_cidr_range = "10.0.0.0/24"
   region        = var.region
-  network       = google_compute_network.k8s_vpc.id
+  network       = google_compute_network.k8s_network.id
 }
 
-resource "google_compute_route" "k8s_rt" {
+resource "google_compute_route" "k8s_worker_rt" {
+  count       = var.worker_node_count
   name        = "${var.name_prefix}-kubernetes-rt"
   dest_range  = "10.200.${count.index}.0/24"
-  depends_on  = ["google_compute_instance.k8s_worker"]
+  depends_on  = [google_compute_instance.ish_bot_kube_worker]
   network     = google_compute_network.k8s_network.self_link
-  next_hop_ip = google_compute_instance.k8s_worker[count.index].network_interface.0.network_ip
+  next_hop_ip = google_compute_instance.ish_bot_kube_worker[count.index].network_interface.0.network_ip
   priority    = 100
 }
 
