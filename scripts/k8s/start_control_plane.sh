@@ -2,6 +2,8 @@
 
 echo && echo "$0: " && echo
 
+CLOUD_PROVIDER = "gcp"
+
 meta() {
     if [ "$CLOUD_PROVIDER" == "aws" ]; then
         curl -s "http://169.254.169.254/latest/meta-data/$1"

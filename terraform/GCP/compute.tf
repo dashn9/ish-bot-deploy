@@ -200,7 +200,7 @@ resource "google_compute_instance" "ish_bot_kube_worker" {
   }
 
   service_account {
-    email  = google_service_account.kube_worker_sa.email
+    email  = google_service_account.pd_csi_service_account.email
     scopes = ["cloud-platform"]
   }
 
