@@ -10,6 +10,6 @@ spec:
   storageClassName: ish-bot-sc
   resources:
     requests:
-      storage: 500Gi
+      storage: 220Gi
 
 # Switch to GlusterFS in the future
