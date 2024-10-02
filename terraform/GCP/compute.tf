@@ -1,8 +1,7 @@
 resource "google_compute_address" "ish_bot_kube_master_ip" {
   name   = "ish-bot-kube-master-ip"
-  region = "${var.region}-a"
+  region = "${var.region}"
 }
-
 resource "google_compute_instance" "ish_bot_kube_master" {
   boot_disk {
     auto_delete = true
@@ -17,17 +16,18 @@ resource "google_compute_instance" "ish_bot_kube_master" {
   can_ip_forward = true
   count          = "${var.master_node_count}"
   machine_type   = "${var.master_node_type}"
-  name           = "k8s-master_node${count.index}"
+  name           = "${var.master_node_name}-${count.index}"
+  tags         = ["kubernetes-cluster"]
 
   network_interface {
-    subnetwork    = "${google_compute_subnetwork.k8s_subnet.name}"
+    subnetwork = google_compute_subnetwork.k8s_subnet.self_link
     access_config {
       nat_ip = google_compute_address.ish_bot_kube_master_ip.address
     }
   }
 
   metadata = {
-    ssh-keys = "your-ssh-user:${tls_private_key.master_node_ssh_keys[count.index].public_key_openssh}"
+    ssh-keys = "${var.master_node_user}:${tls_private_key.master_node_ssh_keys[count.index].public_key_openssh}"
   }
   
   # There is a cleaner way to move these files below
@@ -72,13 +72,13 @@ resource "google_compute_instance" "ish_bot_kube_master" {
 
   # Upload Kubernetes master_node Manager key and certificate
   provisioner "file" {
-    source      = "${var.certificates_path}/kube-master_node-manager.key"
-    destination = "/home/${var.master_node_user}/kube-master_node-manager.key"
+    source      = "${var.certificates_path}/kube-controller-manager.key"
+    destination = "/home/${var.master_node_user}/kube-controller-manager.key"
   }
 
   provisioner "file" {
-    source      = "${var.certificates_path}/kube-master_node-manager.crt"
-    destination = "/home/${var.master_node_user}/kube-master_node-manager.crt"
+    source      = "${var.certificates_path}/kube-controller-manager.crt"
+    destination = "/home/${var.master_node_user}/kube-controller-manager.crt"
   }
 
   # Upload Kubernetes Scheduler key and certificate
@@ -129,8 +129,8 @@ resource "google_compute_instance" "ish_bot_kube_master" {
   }
 
   provisioner "file" {
-    source      = "${var.scripts_path}/generate_master_node_manager_config.sh"
-    destination = "/home/${var.master_node_user}/generate_master_node_manager_config.sh"
+    source      = "${var.scripts_path}/generate_controller_manager_config.sh"
+    destination = "/home/${var.master_node_user}/generate_controller_manager_config.sh"
   }
 
   provisioner "file" {
@@ -171,9 +171,9 @@ resource "google_compute_instance" "ish_bot_kube_master" {
   provisioner "remote-exec" {
 
     inline = [
-      "sudo chmod +x generate_admin_config.sh generate_master_node_manager_config.sh generate_scheduler_config.sh install_control_plane.sh start_control_plane.sh start_etcd.sh",
+      "sudo chmod +x generate_admin_config.sh generate_controller_manager_config.sh generate_scheduler_config.sh install_control_plane.sh start_control_plane.sh start_etcd.sh",
       "./install_control_plane.sh",
-      "./generate_master_node_manager_config.sh",
+      "./generate_controller_manager_config.sh",
       "./generate_scheduler_config.sh",
       "./generate_admin_config.sh",
       "./start_etcd.sh",
@@ -200,16 +200,13 @@ resource "google_compute_instance" "ish_bot_kube_worker" {
     }
   }
 
+  can_ip_forward = true
+
   network_interface {
     subnetwork = google_compute_subnetwork.k8s_subnet.self_link
     access_config {
       # This block gives the instance external access
     }
-  }
-
-  service_account {
-    email  = google_service_account.pd_csi_service_account.email
-    scopes = ["cloud-platform"]
   }
 
   metadata_startup_script = <<-EOF
@@ -218,7 +215,7 @@ resource "google_compute_instance" "ish_bot_kube_worker" {
             EOF
 
   metadata = {
-    ssh-keys = "your-ssh-user:${tls_private_key.worker_node_ssh_keys[count.index].public_key_openssh}"
+    ssh-keys = "${var.worker_node_user}:${tls_private_key.worker_node_ssh_keys[count.index].public_key_openssh}"
   }
 
   connection {

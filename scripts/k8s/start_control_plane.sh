@@ -2,7 +2,7 @@
 
 echo && echo "$0: " && echo
 
-CLOUD_PROVIDER = "gcp"
+CLOUD_PROVIDER="gcp"
 
 meta() {
     if [ "$CLOUD_PROVIDER" == "aws" ]; then
@@ -17,11 +17,11 @@ meta() {
 
 HOSTNAME=$(hostname -s)
 if [ "$CLOUD_PROVIDER" == "aws" ]; then
-    INTERNAL_IP=${2:-$(meta local-ipv4)}
+    INTERNAL_IP=${1:-$(meta local-ipv4)}
 # In the future, this should be the load balancer ip
     CONTROLLER_IP=$(meta public-ipv4)
 elif [ "$CLOUD_PROVIDER" == "gcp" ]; then
-    INTERNAL_IP=${2:-$(meta instance/network-interfaces/0/ip)}
+    INTERNAL_IP=${1:-$(meta instance/network-interfaces/0/ip)}
     CONTROLLER_IP=$(meta instance/network-interfaces/0/access-configs/0/external-ip)
 fi
 

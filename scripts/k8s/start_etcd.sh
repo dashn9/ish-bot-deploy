@@ -6,8 +6,24 @@ echo && echo "$0: " && echo
 # Set the project name from the first argument
 PROJ_NAME=$1
 ETCD_NAME=$(hostname -s)
-# Fetch the internal IP address using the AWS EC2 metadata service
-INTERNAL_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+CLOUD_PROVIDER="gcp"
+meta() {
+    if [ "$CLOUD_PROVIDER" == "aws" ]; then
+        curl -s "http://169.254.169.254/latest/meta-data/$1"
+    elif [ "$CLOUD_PROVIDER" == "gcp" ]; then
+        curl -s -H "Metadata-Flavor: Google" "http://169.254.169.254/computeMetadata/v1/$1"
+    else
+        echo "Unsupported cloud provider: $CLOUD_PROVIDER"
+        exit 1
+    fi
+}
+
+HOSTNAME=$(hostname -s)
+if [ "$CLOUD_PROVIDER" == "aws" ]; then
+    INTERNAL_IP=$(meta local-ipv4)
+elif [ "$CLOUD_PROVIDER" == "gcp" ]; then
+    INTERNAL_IP=$(meta instance/network-interfaces/0/ip)
+fi
 
 # Create necessary directories and copy certificates
 sudo mkdir -p /etc/etcd /var/lib/etcd

@@ -37,7 +37,7 @@ resource "null_resource" "generate_cluster_control_plane_certificates" {
 # Regenerate Control Plane certs again (This is because the kube-apiserver and etcd certs needs to have the IP altNames added)
 resource "null_resource" "regenerate_cluster_control_plane_certificates" {
     provisioner "local-exec" {
-        command = "../../scripts/k8s/generate_cluster_control_plane_certificates.sh -ip 127.0.0.1,${join(",", google_compute_instance.ish_bot_kube_master.*.private_ip)} -p ${google_compute_address.ish_bot_kube_master_ip.address}"
+        command = "../../scripts/k8s/generate_cluster_control_plane_certificates.sh -ip 127.0.0.1,${join(",", [for instance in google_compute_instance.ish_bot_kube_master : instance.network_interface[0].network_ip])} -p ${google_compute_address.ish_bot_kube_master_ip.address}"
     }
 
     depends_on = [ google_compute_instance.ish_bot_kube_master ]
@@ -51,7 +51,7 @@ resource "null_resource" "redistribute_regenerated_certs_on_master" {
         type        = "ssh"
         user        = var.master_node_user
         private_key = file("${var.ssh_path}/${var.master_node_name}-${count.index}.key")
-        host        = google_compute_address.ish_bot_kube_master_ip[count.index].public_ip
+        host        = google_compute_address.ish_bot_kube_master_ip.address
     }
 
     provisioner "file" {
@@ -73,14 +73,14 @@ resource "null_resource" "redistribute_regenerated_certs_on_master" {
 
 # Reason for this, is the worker nodes has to be provisioned before creating the rbac
 resource "null_resource" "create_rbac_on_master_nodes" {
-    depends_on = [google_compute_instance.ish_bot_kube_worker]
+    depends_on = [google_compute_instance.ish_bot_kube_worker,null_resource.redistribute_regenerated_certs_on_master]
     count      = length(google_compute_instance.ish_bot_kube_master)
 
     connection {
         type        = "ssh"
         user        = var.master_node_user
         private_key = file("${var.ssh_path}/${var.master_node_name}-${count.index}.key")
-        host        = google_compute_address.ish_bot_kube_master_ip[count.index].public_ip
+        host        = google_compute_address.ish_bot_kube_master_ip.address
     }
 
     provisioner "remote-exec" {

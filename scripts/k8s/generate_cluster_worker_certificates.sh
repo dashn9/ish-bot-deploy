@@ -18,8 +18,12 @@ meta() {
 HOSTNAME=$(hostname -s)
 if [ "$CLOUD_PROVIDER" == "aws" ]; then
     INTERNAL_IP=${2:-$(meta local-ipv4)}
+    PUBLIC_IP=$(meta public-ipv4)
+    FQDN_HOSTNAME=$(meta hostname)
 elif [ "$CLOUD_PROVIDER" == "gcp" ]; then
     INTERNAL_IP=${2:-$(meta instance/network-interfaces/0/ip)}
+    PUBLIC_IP=$(meta instance/network-interfaces/0/access-configs/0/external-ip)
+    FQDN_HOSTNAME=$(meta instance/hostname)
 fi
 
 # Please consider using TLS bootstrapping in the future, for automated certificate signings on nodes
@@ -35,7 +39,7 @@ fi
 
 chmod +x ./generate_certificate.sh
 
-./generate_certificate.sh "${HOSTNAME}-kubelet-server" "system:node:$HOSTNAME" "$OUTPUT_DIR" "$CA_KEY" "$CA_CERT" --dns $HOSTNAME,$(meta public-ipv4),$(meta hostname) --ip $INTERNAL_IP --group "system:nodes"
+./generate_certificate.sh "${HOSTNAME}-kubelet-server" "system:node:$HOSTNAME" "$OUTPUT_DIR" "$CA_KEY" "$CA_CERT" --dns $HOSTNAME,$PUBLIC_IP,$FQDN_HOSTNAME --ip $INTERNAL_IP --group "system:nodes"
 
 # mv certs to base dirs
 

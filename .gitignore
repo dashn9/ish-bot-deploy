@@ -22,3 +22,6 @@ terraform.rc
 .env
 .aws_credentials
 .gcp_credentials
+
+*.key
+*.crt

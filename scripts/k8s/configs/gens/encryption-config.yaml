@@ -7,6 +7,6 @@ resources:
       - aescbc:
           keys:
             - name: key1
-              secret: Abg2M2+F9Br1D8t+7BRdHVIQk9dEXfCE5FBdxRAgOwI=
+              secret: 6DiPsiVmF+RbZIVriG3iY0xcshq35FRZ3tWBsU5hJJQ=
       - identity: {}
 

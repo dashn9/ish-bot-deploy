@@ -39,7 +39,7 @@ variable "master_node_image" {
 }
 
 variable "master_node_name" {
-  default = "ish_bot_kube_master"
+  default = "ish-bot-kube-master"
 }
 
 variable "master_node_user" {
@@ -67,7 +67,7 @@ variable "worker_node_image" {
 }
 
 variable "worker_node_name" {
-  default = "ish_bot_kube_worker"
+  default = "ish-bot-kube-worker"
 }
 
 variable "worker_node_user" {
