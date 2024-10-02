@@ -36,7 +36,7 @@ spec:
       volumes:
       - name: storage
         persistentVolumeClaim:
-          claimName: ish-bot-ebs-pvc
+          claimName: ish-bot-pvc
       - name: config-volume
         configMap:
           name: ish-bot-config

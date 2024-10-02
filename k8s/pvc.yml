@@ -2,14 +2,14 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: ish-bot-ebs-pvc
+  name: ish-bot-pvc
   namespace: bots
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: ish-bot-ebs-sc
+  storageClassName: ish-bot-sc
   resources:
     requests:
-      storage: 2000Gi
+      storage: 500Gi
 
 # Switch to GlusterFS in the future
