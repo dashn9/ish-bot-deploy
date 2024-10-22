@@ -6,7 +6,7 @@ echo && echo "$0: " && echo
 # Set the project name from the first argument
 PROJ_NAME=$1
 ETCD_NAME=$(hostname -s)
-CLOUD_PROVIDER="gcp"
+CLOUD_PROVIDER="aws"
 meta() {
     if [ "$CLOUD_PROVIDER" == "aws" ]; then
         curl -s "http://169.254.169.254/latest/meta-data/$1"

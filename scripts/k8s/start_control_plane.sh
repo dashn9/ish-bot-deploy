@@ -2,7 +2,7 @@
 
 echo && echo "$0: " && echo
 
-CLOUD_PROVIDER="gcp"
+CLOUD_PROVIDER="aws"
 
 meta() {
     if [ "$CLOUD_PROVIDER" == "aws" ]; then

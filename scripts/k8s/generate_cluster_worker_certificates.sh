@@ -3,7 +3,7 @@
 # Default output directory
 OUTPUT_DIR=${1:-./certificates}
 
-CLOUD_PROVIDER="gcp"
+CLOUD_PROVIDER="aws"
 meta() {
     if [ "$CLOUD_PROVIDER" == "aws" ]; then
         curl -s "http://169.254.169.254/latest/meta-data/$1"
