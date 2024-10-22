@@ -27,7 +27,7 @@ variable "configs_path" {
 }
 
 variable "master_node_type" {
-    default = "t3a.medium"
+    default = "t3a.nano"
 }
 
 variable "master_node_image" {

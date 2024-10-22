@@ -14,7 +14,7 @@ resource "aws_vpc" "k8s_vpc" {
 resource "aws_subnet" "k8s_subnet" {
   vpc_id     = aws_vpc.k8s_vpc.id
   cidr_block = "10.0.0.0/24"
-  # Please endeavour to switch  this to use multiple availability zones
+  # Please endeavour to switch this to use multiple availability zones
   availability_zone       = "${var.availability_zone}a"
   map_public_ip_on_launch = true
 
@@ -55,8 +55,7 @@ resource "aws_route" "k8s_worker_route" {
 
 # Route Table Association
 resource "aws_route_table_association" "k8s_rta" {
-  count          = length(aws_subnet.k8s_subnets)
-  subnet_id      = aws_subnet.k8s_subnets[count.index].id
+  subnet_id      = aws_subnet.k8s_subnet.id
   route_table_id = aws_route_table.k8s_rt.id
 }
 
