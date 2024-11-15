@@ -67,7 +67,7 @@ data:
         fetch-by-value = 
 
         [IDENTITY_ENDPOINTS]
-        base-host = http://ec2-100-28-25-112.compute-1.amazonaws.com/api/
+        base-host = http://ec2-34-198-128-193.compute-1.amazonaws.com/api/
 
         [DEBUGGING]
         print-network = False
