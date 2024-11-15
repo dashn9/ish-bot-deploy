@@ -27,11 +27,11 @@ variable "configs_path" {
 }
 
 variable "master_node_type" {
-    default = "t3a.nano"
+    default = "t4g.micro"
 }
 
 variable "master_node_image" {
-    default = "ami-064519b8c76274859" # Debian
+    default = "ami-0789039e34e739d67" # Debian
 }
 
 variable "master_node_name" {
@@ -43,7 +43,7 @@ variable "master_node_user" {
 }
 
 variable "master_node_root_storage_size" {
-    default = 10
+    default = 8
 }
 
 variable "master_node_root_storage_type" {
@@ -56,11 +56,11 @@ variable "master_node_count" {
 
 
 variable "worker_node_type" {
-    default = "c6a.4xlarge"
+    default = "c6g.xlarge"
 }
 
 variable "worker_node_image" {
-    default = "ami-064519b8c76274859" # Debian
+    default = "ami-0789039e34e739d67" # Debian
 }
 
 variable "worker_node_name" {
@@ -72,7 +72,7 @@ variable "worker_node_user" {
 }
 
 variable "worker_node_root_storage_size" {
-    default = 30
+    default = 15
 }
 
 variable "worker_node_root_storage_type" {
