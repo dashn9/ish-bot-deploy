@@ -27,11 +27,11 @@ variable "configs_path" {
 }
 
 variable "master_node_type" {
-    default = "t4g.micro"
+    default = "t3a.micro"
 }
 
 variable "master_node_image" {
-    default = "ami-0789039e34e739d67" # Debian
+    default = "ami-064519b8c76274859" # Debian
 }
 
 variable "master_node_name" {
@@ -56,11 +56,11 @@ variable "master_node_count" {
 
 
 variable "worker_node_type" {
-    default = "c6g.xlarge"
+    default = "c6a.xlarge"
 }
 
 variable "worker_node_image" {
-    default = "ami-0789039e34e739d67" # Debian
+    default = "ami-064519b8c76274859" # Debian
 }
 
 variable "worker_node_name" {
