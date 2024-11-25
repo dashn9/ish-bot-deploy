@@ -184,7 +184,6 @@ resource "aws_instance" "ish_bot_kube_worker" {
   key_name               = aws_key_pair.tf_worker_node_ssh_keys[count.index].key_name
   subnet_id              = aws_subnet.k8s_subnet.id
   vpc_security_group_ids = [aws_security_group.k8s_sg.id]
-  iam_instance_profile   = aws_iam_instance_profile.ebs_csi_instance_profile.name
 
   user_data = <<-EOF
                 #!/bin/bash
