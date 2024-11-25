@@ -11,7 +11,7 @@ data:
         screen-width = 1920
         screen-height = 1080
         up-taskbar-height = 5
-        debug = True
+        debug = False
         containerized = True
 
         [WAIT_CONDITIONS]
@@ -35,7 +35,7 @@ data:
         ad-ctr-exponent-identity-keys =
 
         [BROWSER]
-        chrome-data-directory = /ebs/chrome-data
+        chrome-data-directory = /var/chrome-data
         maximum-window-probability = 0.92
         # Useful for MacOS, Sets the Browser Window to Fullscreen
         fullscreen-probability = 0.4
@@ -49,12 +49,6 @@ data:
         px-value = 250
 
         [SITE]
-        proxy-whitelisted-domains = whouseem.com,dudialgator.com,bedrapiona.com,fleraprt.com
-        proxy-whitelisted-vip-domains = 
-        proxy-blacklisted-domains = googleapis,chrome,google,gstatic,gvt1,betsmarthq.com,blank.org,googlesyndication,localhost,127.0.0.1
-        proxy-blacklisted-extensions = .html,.js,.json,.css,.jpg,.jpeg,.png,.gif,.svg,.woff,.woff2,.ttf,.ico,.webm,.ogg,.wav,.mp3,.mp4
-        proxy-whitelisted-mimes = */*,text/html
-        allow-url-through-proxy-if-matches-browser-active-url = True
 
         [PROXY]
         use-proxy = True

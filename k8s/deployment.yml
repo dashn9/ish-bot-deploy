@@ -25,15 +25,10 @@ spec:
               name: vnc
           resources:
           volumeMounts:
-          - name: storage
-            mountPath: /ebs
           - name: config-volume
             mountPath: /app/configs
 
       volumes:
-      - name: storage
-        persistentVolumeClaim:
-          claimName: ish-bot-pvc
       - name: config-volume
         configMap:
           name: ish-bot-config
